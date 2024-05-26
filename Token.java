@@ -8,4 +8,29 @@ public abstract class Token<T> {
     public T getValue() {
         return value;
     }
+
+    public static class ImmediateValueToken extends Token<Double> {
+        public ImmediateValueToken(Double value) {
+            super(value);
+        }
+    }
+
+    public static class OperatorToken extends Token<Character> {
+        public OperatorToken(Character value) {
+            super(value);
+        }
+    }
+
+    public static class VariableToken extends Token<Character> {
+        public VariableToken(Character value) {
+            super(value);
+        }
+    }
+
+    public static class FunctionToken extends Token<String> {
+        public FunctionToken(String value) {
+            super(value);
+        }
+    }
+
 }

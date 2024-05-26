@@ -30,11 +30,11 @@ public class ExpressionTree {
         public double evaluate() {
             if (operator == null) {
                 double value;
-                if (token instanceof VariableToken) {
-                    if (!Main.variables.containsKey(((VariableToken) token).getValue()))
-                        throw new IllegalArgumentException("Variable " + ((VariableToken) token).getValue() + " is not defined");
+                if (token instanceof Token.VariableToken) {
+                    if (!Main.variables.containsKey(((Token.VariableToken) token).getValue()))
+                        throw new IllegalArgumentException("Variable " + ((Token.VariableToken) token).getValue() + " is not defined");
 
-                    value = Main.variables.get(((VariableToken) token).getValue());
+                    value = Main.variables.get(((Token.VariableToken) token).getValue());
                 } else {
                     value = (double) token.getValue();
                 }

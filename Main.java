@@ -3,24 +3,38 @@ import java.util.*;
 public class Main {
     Map<Character, Operator> operators = new HashMap<>(){
         {
-            put('+', new Operator('+', (a, b) -> a + b, 1));
-            put('-', new Operator('-', (a, b) -> a - b, 1));
-            put('*', new Operator('*', (a, b) -> a * b, 2));
-            put('/', new Operator('/', (a, b) -> a / b, 2));
-            put('%', new Operator('%', (a, b) -> a % b, 2));
-            put('^', new Operator('^', Math::pow, 3));
-            put('(', new Operator('(', null, 0));
-            put(')', new Operator(')', null, 0));
+            put('+', new Operator.Add());
+            put('-', new Operator.Subtract());
+            put('*', new Operator.Multiply());
+            put('/', new Operator.Divide());
+            put('%', new Operator.Modulo());
+            put('^', new Operator.Power());
         }
     };
 
     static Map<Character, Double> variables = new HashMap<>() {
         {
-            put('x', 2.0);
+            put('e', Math.E);
+            put('π', Math.PI);
         }
     };
 
-    final String expression = "1 * x".replaceAll("\\s", "");
+//    Map<String, Function> functions = new HashMap<>() {
+//        {
+//            put("sin", new Function.Sin());
+//            put("cos", new Function.Cos());
+//            put("tan", new Function.Tan());
+//            put("log", new Function.Log());
+//            put("pow", new Function.Pow());
+//            put("sqrt", new Function.Sqrt());
+//            put("abs", new Function.Abs());
+//            put("ceil", new Function.Ceil());
+//            put("floor", new Function.Floor());
+//            put("round", new Function.Round());
+//        }
+//    };
+
+    final String expression = "2 * e".replaceAll("\\s", "");
 
     List<Token<?>> getTokens() { // original
         List<Token<?>> tokens = new ArrayList<>();
@@ -38,21 +52,21 @@ public class Main {
                 number.append(c);
             } else if (operators.containsKey(c)) {
                 if (number.length() > 0) {
-                    tokens.add(new ImmediateValueToken(Double.parseDouble(number.toString())));
+                    tokens.add(new Token.ImmediateValueToken(Double.parseDouble(number.toString())));
                     number.setLength(0);
                 }
-                tokens.add(new OperatorToken(c));
+                tokens.add(new Token.OperatorToken(c));
             } else {
                 if (!variables.containsKey(c)) {
                     throw new IllegalArgumentException("Invalid character: " + c);
                 }
 
-                tokens.add(new VariableToken(c));
+                tokens.add(new Token.VariableToken(c));
             }
         }
 
         if (number.length() > 0) {
-            tokens.add(new ImmediateValueToken(Double.parseDouble(number.toString())));
+            tokens.add(new Token.ImmediateValueToken(Double.parseDouble(number.toString())));
         }
 
         return tokens;
@@ -64,10 +78,10 @@ public class Main {
         Stack<ExpressionTree.Node> nodes = new Stack<>();
 
         for (Token<?> token : tokens) {
-            if (token instanceof ImmediateValueToken || token instanceof VariableToken) {
+            if (token instanceof Token.ImmediateValueToken || token instanceof Token.VariableToken) {
                 nodes.push(new ExpressionTree.Node(null, null, null, token));
-            } else if (token instanceof OperatorToken) {
-                OperatorToken operatorToken = (OperatorToken) token;
+            } else if (token instanceof Token.OperatorToken) {
+                Token.OperatorToken operatorToken = (Token.OperatorToken) token;
                 Operator operator = this.operators.get(operatorToken.getValue());
 
                 if (operator.operator == '(') {
@@ -92,34 +106,6 @@ public class Main {
 
         return new ExpressionTree(nodes.pop());
     }
-
-//    public ExpressionTree buildExpressionTree() {
-//        List<Token<?>> tokens = getTokens();
-//        Stack<Operator> operators = new Stack<>();
-//        Stack<ExpressionTree.Node> nodes = new Stack<>();
-//
-//        for (Token<?> token : tokens) {
-//            if (token instanceof ImmediateValueToken) {
-//                ImmediateValueToken immediateValueToken = (ImmediateValueToken) token;
-//                nodes.push(new ExpressionTree.Node(null, null, null, immediateValueToken));
-//            } else if (token instanceof OperatorToken) {
-//                OperatorToken operatorToken = (OperatorToken) token;
-//                Operator operator = this.operators.get(operatorToken.getValue());
-//
-//                while (!operators.isEmpty() && operator.getPrecedence() <= operators.peek().getPrecedence()) {
-//                    createAndPushNode(operators, nodes);
-//                }
-//
-//                operators.push(operator);
-//            }
-//        }
-//
-//        while (!operators.isEmpty()) {
-//            createAndPushNode(operators, nodes);
-//        }
-//
-//        return new ExpressionTree(nodes.pop());
-//    }
 
     private void createAndPushNode(Stack<Operator> operators, Stack<ExpressionTree.Node> nodes) {
         Operator operator = operators.pop();
