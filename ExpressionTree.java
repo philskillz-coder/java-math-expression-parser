@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class ExpressionTree {
     private final Node root;
 
@@ -15,10 +18,10 @@ public class ExpressionTree {
     }
 
     public static class Node {
-        private final Operator operator;
-        private final Node left;
-        private final Node right;
-        private final Token<?> token;
+        protected final Operator operator;
+        protected Node left;
+        protected final Node right;
+        protected final Token<?> token;
 
         public Node(Operator operator, Node left, Node right, Token<?> token) {
             this.operator = operator;
@@ -55,10 +58,59 @@ public class ExpressionTree {
             }
 
             System.out.print("(");
-            left.print();
+            if (left != null) {
+                left.print();
+            } else {
+                System.out.print("null");
+            }
+
             System.out.print(" " + operator.operator + " ");
-            right.print();
+            if (right != null) {
+                right.print();
+            } else {
+                System.out.print("null");
+            }
             System.out.print(")");
+        }
+    }
+
+    public static class FunctionRootNode extends Node {
+
+        public FunctionRootNode(Operator operator, Node left, Node right, Token<?> token) {
+            super(operator, left, right, token);
+        }
+
+        public static List<Node> parseTreeNodes(Node root) {
+            List<Node> nodes = new ArrayList<>();
+            collectNodes(root, nodes);
+            return nodes;
+        }
+
+        private static void collectNodes(Node node, List<Node> nodes) {
+            if (node == null) {
+                return;
+            }
+            nodes.add(node);
+            collectNodes(node.left, nodes);
+            collectNodes(node.right, nodes);
+        }
+
+        @Override
+        public double evaluate() {
+            // parameter nodes:
+            // left side: next parameter
+            // right side: parameter value node
+
+            List<Node> parameters = new ArrayList<>();
+            Node current = left;
+            while (current != null) {
+                parameters.add(current.right);
+                current = current.left;
+            }
+
+            double[] evaluated = parameters.stream().mapToDouble(Node::evaluate).toArray();
+
+            return operator.apply(evaluated);
         }
     }
 

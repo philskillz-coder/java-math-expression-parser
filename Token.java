@@ -27,10 +27,33 @@ public abstract class Token<T> {
         }
     }
 
-    public static class FunctionToken extends Token<String> {
-        public FunctionToken(String value) {
+    public static class FunctionToken extends Token<Function> {
+        public FunctionToken(Function value) {
             super(value);
         }
     }
 
+    public static class FunctionEndToken extends Token<Character> {
+        public FunctionEndToken(Character value) {
+            super(value);
+        }
+    }
+
+    public static class ParenthesisToken extends Token<Character> {
+        public ParenthesisToken(Character value) {
+            super(value);
+        }
+    }
+
+    public static class CommaToken extends Token<Character> {
+        public CommaToken(Character value) {
+            super(value);
+        }
+    }
+
+    public static class ParamToken extends Token<Character> {
+        public ParamToken(Character value) {
+            super(value);
+        }
+    }
 }
