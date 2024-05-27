@@ -9,20 +9,6 @@ public class Main {
             put('/', new Operator.Divide());
             put('%', new Operator.Modulo());
             put('^', new Operator.Power());
-            put('~', new Function("Harmonic mean"){
-                @Override
-                public double apply(double... args) {
-                    double a = args[0];
-                    double b = args[1];
-                    return 2*a*b/(a+b);
-                }
-            });
-            put('!', new Operator('!', 4) {
-                @Override
-                public double apply(double... args) {
-                    return -args[1];
-                }
-            });
         }
     };
 
@@ -52,7 +38,7 @@ public class Main {
 
 
 
-    final String expression = "4*(1-cos(2*53)/2) - log(sin(30))".replaceAll("\\s", "");
+    final String expression = "(((3)))+0".replaceAll("\\s", "");
 
     List<Token<?>> tokenize() {
         List<Token<?>> tokens = new ArrayList<>();
@@ -141,59 +127,6 @@ public class Main {
         return tokens;
     }
 
-    private int buildExpressionTreeRecursive(List<Token<?>> tokens, int index, Stack<Operator> operators, Stack<ExpressionTree.Node> nodes) {
-        for (; index < tokens.size(); index++) {
-            Token<?> token = tokens.get(index);
-
-            if (token instanceof Token.ImmediateValueToken || token instanceof Token.VariableToken) {
-                nodes.push(new ExpressionTree.Node(null, null, null, token));
-            } else if (token instanceof Token.OperatorToken) {
-                Token.OperatorToken operatorToken = (Token.OperatorToken) token;
-                Operator operator = this.operators.get(operatorToken.getValue());
-
-                while (!operators.isEmpty() && operator.getPrecedence() <= operators.peek().getPrecedence()) {
-                    createAndPushNode(operators, nodes);
-                }
-
-                operators.push(operator);
-            } else if (token instanceof Token.ParenthesisToken) {
-                Token.ParenthesisToken parenthesisToken = (Token.ParenthesisToken) token;
-
-                if (parenthesisToken.getValue() == '(') {
-                    index = buildExpressionTreeRecursive(tokens, index + 1, operators, nodes);
-                } else {
-                    while (operators.peek().operator != "(") {
-                        createAndPushNode(operators, nodes);
-                    }
-                    operators.pop(); // Pop the '(' operator
-
-                    // If the top of the stack is a function, handle it specially
-//                    if (!operators.isEmpty() && operators.peek() instanceof Operator.FunctionOp) {
-//                        Operator functionOp = operators.pop();
-//                        ExpressionTree.Node functionNode = nodes.pop();
-//                        createFunctionNode(functionOp, functionNode, nodes);
-//                    }
-
-                    return index;
-                }
-            } else if (token instanceof Token.FunctionToken) {
-                nodes.push(new ExpressionTree.Node(null, null, null, token));
-//                operators.push(new Operator.FunctionOp(((Token.FunctionToken) token).getValue()));
-            } else if (token instanceof Token.CommaToken) {
-                while (operators.peek().operator != "(") {
-                    createAndPushNode(operators, nodes);
-                }
-            }
-        }
-
-        // Process remaining operators
-        while (!operators.isEmpty()) {
-            createAndPushNode(operators, nodes);
-        }
-
-        return index;
-    }
-
     public Stack<ExpressionTree.Node> buildExpressionTreeRecursiveNew(List<Token<?>> tokens) {
         Stack<ExpressionTree.Node> nodes = new Stack<>();
         Stack<Operator> operators = new Stack<>();
@@ -218,26 +151,45 @@ public class Main {
                 if (parenthesisToken.getValue() == '(') {
                     // Recursive call to build expression tree for the sub-expression
                     // find the matching closing parenthesis
-                    int startPosition = i + 1; // start from the next token
-                    int endPosition = findClosingParenthesis(tokens, startPosition);
+                    int startParIndex = i; // start from the par
+                    int endParIndex = findClosingParenthesis(tokens, startParIndex, "parenthesis");
+                    i = endParIndex;
+                    System.out.println("Parenthesis start: " + startParIndex + " end: " + endParIndex);
 
-                    List<Token<?>> subExpressionTokens = tokens.subList(startPosition, endPosition);
+                    List<Token<?>> subExpressionTokens = tokens.subList(startParIndex+1, endParIndex);
                     Stack<ExpressionTree.Node> subExpressionTree = buildExpressionTreeRecursiveNew(subExpressionTokens);
                     nodes.push(subExpressionTree.pop());
-                    i = endPosition; // skip the sub-expression tokens
                 } // you cant get a closing parenthesis here because it is handled in the recursive call
             } else if (token instanceof Token.FunctionToken) {
+                Token.FunctionToken functionToken = (Token.FunctionToken) token;
                 // similar to parenthesis, we need to build the function node and its parameter list
                 // after the function token, there should be a parenthesis
                 // find the matching closing parenthesis
-                int startPosition = i + 2; // start from the next token after the par token
-                int endPosition = findClosingParenthesis(tokens, startPosition);
-
+                int startParIndex = i + 1; // start from the next token after the par token
+                int endParIndex = findClosingParenthesis(tokens, startParIndex, "function");
+                i = endParIndex; // skip the function and its parameters
+                System.out.println("Function " + functionToken.getValue().operator + " start: " + startParIndex + " end: " + endParIndex);
                 // find all parameters separated by commas between the parenthesis
                 List<List<Token<?>>> parameters = new ArrayList<>();
                 List<Token<?>> currentParameter = new ArrayList<>();
-                for (int j=startPosition; j<endPosition; j++) {
-                    if (tokens.get(j) instanceof Token.CommaToken) {
+
+                int openParenthesisCount = 0;
+                for (int j=startParIndex+1; j<endParIndex; j++) {
+                    if (tokens.get(j) instanceof Token.ParenthesisToken) {
+                        Token.ParenthesisToken token1 = (Token.ParenthesisToken) tokens.get(j);
+                        if (token1.getValue() == '(') {
+                            openParenthesisCount++;
+                        } else if (token1.getValue() == ')') {
+                            openParenthesisCount--;
+                        }
+                    }
+//                    if (tokens.get(j) instanceof Token.CommaToken) {
+//                        parameters.add(currentParameter);
+//                        currentParameter = new ArrayList<>();
+//                    } else {
+//                        currentParameter.add(tokens.get(j));
+//                    }
+                    if (openParenthesisCount == 0 && tokens.get(j) instanceof Token.CommaToken) {
                         parameters.add(currentParameter);
                         currentParameter = new ArrayList<>();
                     } else {
@@ -248,6 +200,8 @@ public class Main {
                 if (!currentParameter.isEmpty()) {
                     parameters.add(currentParameter);
                 }
+
+                System.out.println("Function has " + parameters.size() + " parameters");
 
                 // create parameter nodes
                 List<ExpressionTree.Node> rootParameterNodes = new ArrayList<>();
@@ -279,7 +233,6 @@ public class Main {
 
                 // push the function node to the nodes stack
                 nodes.push(functionNode);
-                i = endPosition; // skip the function and its parameters
             }
         }
 
@@ -293,20 +246,22 @@ public class Main {
     /**
      * Find the closing parenthesis for the given opening parenthesis
      * @param tokens list of tokens
-     * @param startPosition index of the opening parenthesis
+     * @param startParIndex index of the opening parenthesis
      * @return index of the closing parenthesis
      */
-    private static int findClosingParenthesis(List<Token<?>> tokens, int startPosition) {
+    private static int findClosingParenthesis(List<Token<?>> tokens, int startParIndex, String type) {
         int endPosition = -1;
-        int openParenthesisCount = 1;
+        int openParenthesisCount = 0;
 
-        for (int j = startPosition; j < tokens.size(); j++) {
+        for (int j = startParIndex; j < tokens.size(); j++) {
             if (tokens.get(j) instanceof Token.ParenthesisToken) {
                 Token.ParenthesisToken token1 = (Token.ParenthesisToken) tokens.get(j);
                 if (token1.getValue() == '(') {
                     openParenthesisCount++;
+                    System.out.println("Open par. now " + openParenthesisCount);
                 } else if (token1.getValue() == ')') {
                     openParenthesisCount--;
+                    System.out.println("Close par. now " + openParenthesisCount);
                     if (openParenthesisCount == 0) {
                         endPosition = j;
                         break;
@@ -314,9 +269,8 @@ public class Main {
                 }
             }
         }
-
         if (endPosition == -1) { // should never happen because tokenizer should catch this
-            throw new IllegalArgumentException("Unmatched parenthesis");
+            throw new IllegalArgumentException("Unmatched parenthesis: " + type);
         }
         return endPosition;
     }
