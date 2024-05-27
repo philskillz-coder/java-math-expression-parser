@@ -295,7 +295,7 @@ public class Main {
         expressionTree.printTree();
         double result = expressionTree.evaluate();
 
-        expressionTree.print("", true);
+        expressionTree.print();
 
         System.out.println(main.expression + " = " + result);
     }

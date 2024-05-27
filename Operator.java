@@ -1,5 +1,3 @@
-import java.util.function.BiFunction;
-
 public abstract class Operator {
     final String operator;
     final int precedence;

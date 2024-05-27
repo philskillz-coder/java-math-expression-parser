@@ -33,12 +33,6 @@ public abstract class Token<T> {
         }
     }
 
-    public static class FunctionEndToken extends Token<Character> {
-        public FunctionEndToken(Character value) {
-            super(value);
-        }
-    }
-
     public static class ParenthesisToken extends Token<Character> {
         public ParenthesisToken(Character value) {
             super(value);

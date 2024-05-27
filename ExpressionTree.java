@@ -13,10 +13,10 @@ public class ExpressionTree {
     }
 
     public void printTree() {
-        List<List<String>> lines = new ArrayList<List<String>>();
+        List<List<String>> lines = new ArrayList<>();
 
-        List<Node> level = new ArrayList<Node>();
-        List<Node> next = new ArrayList<Node>();
+        List<Node> level = new ArrayList<>();
+        List<Node> next = new ArrayList<>();
 
         level.add(root);
         int nn = 1;
@@ -24,7 +24,7 @@ public class ExpressionTree {
         int widest = 0;
 
         while (nn != 0) {
-            List<String> line = new ArrayList<String>();
+            List<String> line = new ArrayList<>();
 
             nn = 0;
 
@@ -56,10 +56,10 @@ public class ExpressionTree {
             next.clear();
         }
 
-        int perpiece = lines.get(lines.size() - 1).size() * (widest + 4);
+        int pp = lines.get(lines.size() - 1).size() * (widest + 4);
         for (int i = 0; i < lines.size(); i++) {
             List<String> line = lines.get(i);
-            int hpw = (int) Math.floor(perpiece / 2f) - 1;
+            int hpw = (int) Math.floor(pp / 2f) - 1;
 
             if (i > 0) {
                 for (int j = 0; j < line.size(); j++) {
@@ -69,14 +69,14 @@ public class ExpressionTree {
                         if (line.get(j - 1) != null) {
                             c = (line.get(j) != null) ? '┴' : '┘';
                         } else {
-                            if (j < line.size() && line.get(j) != null) c = '└';
+                            if (line.get(j) != null) c = '└';
                         }
                     }
                     System.out.print(c);
 
                     // lines and spaces
                     if (line.get(j) == null) {
-                        for (int k = 0; k < perpiece - 1; k++) {
+                        for (int k = 0; k < pp - 1; k++) {
                             System.out.print(" ");
                         }
                     } else {
@@ -93,11 +93,11 @@ public class ExpressionTree {
             }
 
             // print line of numbers
-            for (int j = 0; j < line.size(); j++) {
-                String f = line.get(j);
+            for (String f : line) {
                 if (f == null) f = "";
-                int gap1 = (int) Math.ceil(perpiece / 2f - f.length() / 2f);
-                int gap2 = (int) Math.floor(perpiece / 2f - f.length() / 2f);
+                float asd = pp / 2f - f.length() / 2f;
+                int gap1 = (int) Math.ceil(asd);
+                int gap2 = (int) Math.floor(asd);
 
                 // a number
                 for (int k = 0; k < gap1; k++) {
@@ -110,11 +110,11 @@ public class ExpressionTree {
             }
             System.out.println();
 
-            perpiece /= 2;
+            pp /= 2;
         }
     }
 
-    public void print(String prefix, boolean isTail) {
+    public void print() {
         root.print();
     }
 
@@ -171,21 +171,6 @@ public class ExpressionTree {
 
         public FunctionRootNode(Operator operator, Node left, Node right, Token<?> token) {
             super(operator, left, right, token);
-        }
-
-        public static List<Node> parseTreeNodes(Node root) {
-            List<Node> nodes = new ArrayList<>();
-            collectNodes(root, nodes);
-            return nodes;
-        }
-
-        private static void collectNodes(Node node, List<Node> nodes) {
-            if (node == null) {
-                return;
-            }
-            nodes.add(node);
-            collectNodes(node.left, nodes);
-            collectNodes(node.right, nodes);
         }
 
 
