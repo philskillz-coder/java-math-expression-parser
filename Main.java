@@ -38,7 +38,7 @@ public class Main {
 
 
 
-    final String expression = "(((3)))+0".replaceAll("\\s", "");
+    final String expression = "max(1,2,3)/min(1,2,3)".replaceAll("\\s", "");
 
     List<Token<?>> tokenize() {
         List<Token<?>> tokens = new ArrayList<>();
@@ -215,9 +215,8 @@ public class Main {
                 ExpressionTree.Node firstParamNode = null;
 
 
-                Token<?> paramToken = new Token.ParamToken('p'); // Adjust this based on your Token class
-
                 for (int p = rootParameterNodes.size() - 1; p >= 0; p--) {
+                    Token.ParamToken paramToken = new Token.ParamToken("Param"+p);
                     ExpressionTree.Node currentNode = rootParameterNodes.get(p);
                     if (firstParamNode == null) {
                         firstParamNode = new ExpressionTree.Node(null, null, currentNode, paramToken);
@@ -294,8 +293,10 @@ public class Main {
     public static void main(String[] args) {
         Main main = new Main();
         ExpressionTree expressionTree = main.buildExpressionTreeNew();
-        expressionTree.print();
+        expressionTree.printTree();
         double result = expressionTree.evaluate();
+
+        expressionTree.print("", true);
 
         System.out.println(main.expression + " = " + result);
         System.out.println(main.tokenize());

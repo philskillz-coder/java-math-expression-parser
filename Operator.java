@@ -5,6 +5,11 @@ public abstract class Operator {
     final int precedence;
 
 
+    @Override
+    public String toString() {
+        return operator;
+    }
+
     public Operator(String operator, int precedence) {
         this.operator = operator;
         this.precedence = precedence;

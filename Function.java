@@ -1,5 +1,10 @@
 public abstract class Function extends Operator {
 
+    @Override
+    public String toString() {
+        return operator;
+    }
+
     public Function(String operator) {
         super(operator, 0);
     }

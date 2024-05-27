@@ -51,8 +51,8 @@ public abstract class Token<T> {
         }
     }
 
-    public static class ParamToken extends Token<Character> {
-        public ParamToken(Character value) {
+    public static class ParamToken extends Token<String> {
+        public ParamToken(String value) {
             super(value);
         }
     }
