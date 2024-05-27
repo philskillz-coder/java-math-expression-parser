@@ -38,7 +38,7 @@ public class Main {
 
 
 
-    final String expression = "max(1,2,3)/min(1,2,3)".replaceAll("\\s", "");
+    final String expression = "max(1,2,3) / min(1,2,3)".replaceAll("\\s", "").toLowerCase();
 
     List<Token<?>> tokenize() {
         List<Token<?>> tokens = new ArrayList<>();
@@ -183,12 +183,7 @@ public class Main {
                             openParenthesisCount--;
                         }
                     }
-//                    if (tokens.get(j) instanceof Token.CommaToken) {
-//                        parameters.add(currentParameter);
-//                        currentParameter = new ArrayList<>();
-//                    } else {
-//                        currentParameter.add(tokens.get(j));
-//                    }
+
                     if (openParenthesisCount == 0 && tokens.get(j) instanceof Token.CommaToken) {
                         parameters.add(currentParameter);
                         currentParameter = new ArrayList<>();
@@ -212,23 +207,7 @@ public class Main {
 
                 // Make the root parameter nodes into a single node (reversed: first parameter is the root node)
                 // Left side: next parameter
-                ExpressionTree.Node firstParamNode = null;
-
-
-                for (int p = rootParameterNodes.size() - 1; p >= 0; p--) {
-                    Token.ParamToken paramToken = new Token.ParamToken("Param"+p);
-                    ExpressionTree.Node currentNode = rootParameterNodes.get(p);
-                    if (firstParamNode == null) {
-                        firstParamNode = new ExpressionTree.Node(null, null, currentNode, paramToken);
-                    } else {
-                        // Create a new node with firstParamNode as the left child and currentNode as the right child
-                        firstParamNode = new ExpressionTree.Node(null, firstParamNode, currentNode, paramToken);
-                    }
-                }
-
-                // create function node
-                Function func = ((Token.FunctionToken) token).getValue();
-                ExpressionTree.FunctionRootNode functionNode = new ExpressionTree.FunctionRootNode(func, firstParamNode, null, new Token.FunctionToken(func));
+                ExpressionTree.FunctionRootNode functionNode = getFunctionRootNode(rootParameterNodes, (Token.FunctionToken) token);
 
                 // push the function node to the nodes stack
                 nodes.push(functionNode);
@@ -240,6 +219,26 @@ public class Main {
         }
 
         return nodes;
+    }
+
+    private static ExpressionTree.FunctionRootNode getFunctionRootNode(List<ExpressionTree.Node> rootParameterNodes, Token.FunctionToken token) {
+        ExpressionTree.Node firstParamNode = null;
+
+
+        for (int p = rootParameterNodes.size() - 1; p >= 0; p--) {
+            Token.ParamToken paramToken = new Token.ParamToken("Param"+p);
+            ExpressionTree.Node currentNode = rootParameterNodes.get(p);
+            if (firstParamNode == null) {
+                firstParamNode = new ExpressionTree.Node(null, null, currentNode, paramToken);
+            } else {
+                // Create a new node with firstParamNode as the left child and currentNode as the right child
+                firstParamNode = new ExpressionTree.Node(null, firstParamNode, currentNode, paramToken);
+            }
+        }
+
+        // create function node
+        Function func = token.getValue();
+        return new ExpressionTree.FunctionRootNode(func, firstParamNode, null, new Token.FunctionToken(func));
     }
 
     /**
@@ -299,6 +298,5 @@ public class Main {
         expressionTree.print("", true);
 
         System.out.println(main.expression + " = " + result);
-        System.out.println(main.tokenize());
     }
 }
