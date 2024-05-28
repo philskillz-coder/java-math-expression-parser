@@ -1,10 +1,5 @@
 public abstract class Function extends Operator {
 
-    @Override
-    public String toString() {
-        return operator;
-    }
-
     public Function(String operator) {
         super(operator, 0);
     }
@@ -159,5 +154,225 @@ public abstract class Function extends Operator {
         }
     }
 
+    public static class Random extends Function {
+        public Random() {
+            super("random");
+        }
 
+        @Override
+        public double apply(double... args) {
+            if (args.length == 0) {
+                return Math.random(); // Random number between 0 and 1
+            } else if (args.length == 1) {
+                return Math.random() * args[0]; // Random number between 0 and args[0]
+            } else {
+                return Math.random() * (args[1] - args[0]) + args[0]; // Random number between args[0] and args[1]
+            }
+        }
+    }
+
+
+
+
+    public static class BitwiseAndGate extends Function {
+        public BitwiseAndGate() {
+            super("band");
+        }
+
+        @Override
+        public double apply(double... args) {
+            int result = (int)args[0];
+            for (int i = 1; i < args.length; i++) {
+                result &= (int)args[i];
+            }
+            return result;
+        }
+    }
+
+    public static class BitwiseOrGate extends Function {
+        public BitwiseOrGate() {
+            super("bor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            int result = (int)args[0];
+            for (int i = 1; i < args.length; i++) {
+                result |= (int)args[i];
+            }
+            return result;
+        }
+    }
+
+    public static class BitwiseXorGate extends Function {
+        public BitwiseXorGate() {
+            super("bxor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            int result = (int)args[0];
+            for (int i = 1; i < args.length; i++) {
+                result ^= (int)args[i];
+            }
+            return result;
+        }
+    }
+
+    public static class BitwiseNotGate extends Function {
+        public BitwiseNotGate() {
+            super("bnot");
+        }
+
+        @Override
+        public double apply(double... args) {
+            return ~(int)args[0]; // NOT operation is only applicable to a single input
+        }
+    }
+
+    public static class BitwiseNandGate extends Function {
+        public BitwiseNandGate() {
+            super("bnand");
+        }
+
+        @Override
+        public double apply(double... args) {
+            int result = (int)args[0];
+            for (int i = 1; i < args.length; i++) {
+                result &= (int)args[i];
+            }
+            return ~result;
+        }
+    }
+
+    public static class BitwiseNorGate extends Function {
+        public BitwiseNorGate() {
+            super("bnor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            int result = (int)args[0];
+            for (int i = 1; i < args.length; i++) {
+                result |= (int)args[i];
+            }
+            return ~result;
+        }
+    }
+
+    public static class BitwiseXnorGate extends Function {
+        public BitwiseXnorGate() {
+            super("bxnor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            int result = (int)args[0];
+            for (int i = 1; i < args.length; i++) {
+                result ^= (int)args[i];
+            }
+            return ~result;
+        }
+    }
+
+    public static class LogicalAndGate extends Function {
+        public LogicalAndGate() {
+            super("land");
+        }
+
+        @Override
+        public double apply(double... args) {
+            boolean result = args[0] != 0;
+            for (int i = 1; i < args.length; i++) {
+                result &= args[i] != 0;
+            }
+            return result ? 1 : 0;
+        }
+    }
+
+    public static class LogicalOrGate extends Function {
+        public LogicalOrGate() {
+            super("lor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            boolean result = args[0] != 0;
+            for (int i = 1; i < args.length; i++) {
+                result |= args[i] != 0;
+            }
+            return result ? 1 : 0;
+        }
+    }
+
+    public static class LogicalNotGate extends Function {
+        public LogicalNotGate() {
+            super("lnot");
+        }
+
+        @Override
+        public double apply(double... args) {
+            return (args[0] != 0) ? 0 : 1; // NOT operation is only applicable to a single input
+        }
+    }
+
+    public static class LogicalNandGate extends Function {
+        public LogicalNandGate() {
+            super("lnand");
+        }
+
+        @Override
+        public double apply(double... args) {
+            boolean result = args[0] != 0;
+            for (int i = 1; i < args.length; i++) {
+                result &= args[i] != 0;
+            }
+            return !result ? 1 : 0;
+        }
+    }
+
+    public static class LogicalNorGate extends Function {
+        public LogicalNorGate() {
+            super("lnor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            boolean result = args[0] != 0;
+            for (int i = 1; i < args.length; i++) {
+                result |= args[i] != 0;
+            }
+            return !result ? 1 : 0;
+        }
+    }
+
+    public static class LogicalXorGate extends Function {
+        public LogicalXorGate() {
+            super("lxor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            boolean result = args[0] != 0;
+            for (int i = 1; i < args.length; i++) {
+                result ^= args[i] != 0;
+            }
+            return result ? 1 : 0;
+        }
+    }
+
+    public static class LogicalXnorGate extends Function {
+        public LogicalXnorGate() {
+            super("lxnor");
+        }
+
+        @Override
+        public double apply(double... args) {
+            boolean result = args[0] != 0;
+            for (int i = 1; i < args.length; i++) {
+                result ^= args[i] != 0;
+            }
+            return !result ? 1 : 0;
+        }
+    }
 }

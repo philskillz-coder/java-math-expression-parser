@@ -33,12 +33,40 @@ public class Main {
             put("round", new Function.Round());
             put("min", new Function.Min());
             put("max", new Function.Max());
+            put("rand", new Function.Random());
+
+            // logical functions
+            put("lAnd", new Function.LogicalAndGate());
+            put("lOr", new Function.LogicalOrGate());
+            put("lNot", new Function.LogicalNotGate());
+            put("lNand", new Function.LogicalNandGate());
+            put("lNor", new Function.LogicalNorGate());
+            put("lXor", new Function.LogicalXorGate());
+            put("lXnor", new Function.LogicalXnorGate());
+
+            // bitwise functions
+            put("bAnd", new Function.BitwiseAndGate());
+            put("bOr", new Function.BitwiseOrGate());
+            put("bNot", new Function.BitwiseNotGate());
+            put("bNand", new Function.BitwiseNandGate());
+            put("bNor", new Function.BitwiseNorGate());
+            put("bXor", new Function.BitwiseXorGate());
+            put("bXnor", new Function.BitwiseXnorGate());
         }
     };
 
 
+    Main() {
+        // make keys in functions map lowercase
+        Map<String, Function> functionsLower = new HashMap<>();
+        for (Map.Entry<String, Function> entry : functions.entrySet()) {
+            functionsLower.put(entry.getKey().toLowerCase(), entry.getValue());
+        }
+        functions = functionsLower;
 
-    final String expression = "max(1,2,3) / min(1,2,3)".replaceAll("\\s", "").toLowerCase();
+    }
+
+    final String expression = "rand(1,10)".replaceAll("\\s", "").toLowerCase();
 
     List<Token<?>> tokenize() {
         List<Token<?>> tokens = new ArrayList<>();
@@ -49,7 +77,9 @@ public class Main {
 
         for (char c : expression.toCharArray()) {
             if (c == ',') {
-                assert !lastTokenIsFunction : "Token after function should be a parenthesis";
+                if (lastTokenIsFunction) {
+                    throw new IllegalArgumentException("Token after function should be a parenthesis");
+                }
                 if (numberOrFunctionOrVariable.length() > 0) {
                     String str = numberOrFunctionOrVariable.toString();
                     if (numberHasFloatingPoint || Character.isDigit(str.charAt(0))){
@@ -65,7 +95,9 @@ public class Main {
                 }
                 tokens.add(new Token.CommaToken(c));
             } else if (Character.isDigit(c) || c == '.') {
-                assert !lastTokenIsFunction : "Token after function should be a parenthesis";
+                if (lastTokenIsFunction) {
+                    throw new IllegalArgumentException("Token after function should be a parenthesis");
+                }
                 if (c == '.') {
                     if (numberHasFloatingPoint) {
                         throw new IllegalArgumentException("Invalid number format");
@@ -74,11 +106,15 @@ public class Main {
                 }
                 numberOrFunctionOrVariable.append(c);
             } else if (Character.isLetter(c)) {
-                assert !lastTokenIsFunction : "Token after function should be a parenthesis";
+                if (lastTokenIsFunction) {
+                    throw new IllegalArgumentException("Token after function should be a parenthesis");
+                }
                 numberOrFunctionOrVariable.append(c);
             } else {
                 if (numberOrFunctionOrVariable.length() > 0) {
-                    assert !lastTokenIsFunction : "Token after function should be a parenthesis";
+                    if (lastTokenIsFunction) {
+                        throw new IllegalArgumentException("Token after function should be a parenthesis");
+                    }
                     String str = numberOrFunctionOrVariable.toString();
                     if (numberHasFloatingPoint || Character.isDigit(str.charAt(0))){
                         tokens.add(new Token.ImmediateValueToken(Double.parseDouble(str)));
@@ -92,7 +128,9 @@ public class Main {
                     numberHasFloatingPoint = false;
                 }
                 if (operators.containsKey(c)) {
-                    assert !lastTokenIsFunction : "Token after function should be a parenthesis";
+                    if (lastTokenIsFunction) {
+                        throw new IllegalArgumentException("Token after function should be a parenthesis");
+                    }
                     tokens.add(new Token.OperatorToken(c));
                 } else if (c == '(' || c == ')') {
                     switch (c) {
@@ -101,8 +139,12 @@ public class Main {
                             openParenthesisCount++;
                             break;
                         case ')':
-                            assert !lastTokenIsFunction : "Token after function should be a parenthesis";
-                            assert openParenthesisCount > 0 : "Unmatched parenthesis";
+                            if (lastTokenIsFunction) {
+                                throw new IllegalArgumentException("Token after function should be a parenthesis");
+                            }
+                            if (openParenthesisCount <= 0) {
+                                throw new IllegalArgumentException("Unmatched parenthesis");
+                            }
                             openParenthesisCount--;
                             break;
                     }
@@ -116,13 +158,15 @@ public class Main {
             if (numberHasFloatingPoint || Character.isDigit(str.charAt(0))) {
                 tokens.add(new Token.ImmediateValueToken(Double.parseDouble(str)));
             } else if (functions.containsKey(str)) {
-                assert false : "Function without body";
+                throw new IllegalArgumentException("Function without body");
             } else {
                 tokens.add(new Token.VariableToken(str.charAt(0)));
             }
         }
 
-        assert openParenthesisCount == 0 : "Unmatched parenthesis";
+        if (openParenthesisCount != 0) {
+            throw new IllegalArgumentException("Unmatched parenthesis");
+        }
 
         return tokens;
     }
